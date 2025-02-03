@@ -5,6 +5,8 @@ This is a PCB lamp that I started in a workshop. The PCB light ring and [Arduino
 
 I later expanded upon the provided arduino code and created the 3d models using Onshape so that it looks like a UFO. The lamp operates using the Rev2 board's proximity and gesture sensors.
 
+Ideally, there will be an on and off switch and it will be controlled with gestures.
+
 ### To Do:
 Future plans include: <br/>
 [ ] Improve 3d model fit <br/>
