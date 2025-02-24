@@ -4,8 +4,7 @@ NOTE: the sensor is ON THE BOARD
 I want this lamp to:
 - on off switch (using button?)
 - color switch (cycle) when detect swip left or right gesture
-- color gesture is cool
-- bluetooth connection that allows for custom color selection of the lights
+- bluetooth connection that allows for custom color selection of the lights (via website idk)
 
   Gesture directions are as follows:
   - UP:    from USB connector towards antenna
@@ -27,21 +26,16 @@ I want this lamp to:
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-long CurrentTime = 0;
-long StartTime = 0;
-
-
-int rgbcolors[] = 
-  {
-    234085085, //red
-    243156060, //orange
-    236208063, //yellow
-    110179094, //green
-    073150200, //blue
-    119078216 //purple
-  };
-
+long pastTime = millis();
 int rgbCount = 0;
+int colorsLength;
+
+//color generated using https://coolors.co/palettes/trending and https://coolors.co/generate
+long rgbcolors[] = 
+  {
+    16069029,
+    45198083
+  };
 
 void setup() 
 {
@@ -53,10 +47,12 @@ void setup()
     Serial.println("Error initializing APDS-9960 sensor!");
   }
   rgbCount = 0;
+  colorsLength = sizeof(rgbcolors) / sizeof(int); //determine item length of array 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixels.show();  // Initialize all pixels to 'off'
   pixels.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
   Serial.println("Detecting gestures ...");
+
 }
 
 void loop() 
@@ -66,11 +62,28 @@ void loop()
     int gesture = APDS.readGesture();
     pixels.clear(); // Set all pixel colors to 'off'
 
-    if(GESTURE_LEFT || GESTURE_RIGHT)
+    if((GESTURE_LEFT || GESTURE_RIGHT) && millis() - pastTime > 200)
     {
-      for (int i = 0; i < NUMPIXELS; i++) 
+      if(rgbCount >= colorsLength - 1)
       {
-        pixels.setPixelColor(i, pixels.Color((rgbcolors[rgbCount] >> 16) & 0xFF, (rgbcolors[rgbCount] >> 8) & 0xFF, rgbcolors[rgbCount] & 0xFF));
+        rgbCount = 0;
+      }
+      else
+      {
+        rgbCount++;
+      }
+
+      //bit shifting doesn't work to get decimal digits (base 10). it's easeir to mult/div by powers of 10 not shifts
+      int r = rgbcolors[rgbCount] / 1000000; //remove last 6 digits 
+      int g = int(rgbcolors[rgbCount] / 1000) % 1000; 
+      int b =  rgbcolors[rgbCount] % 1000;
+
+      Serial.println("color switch: " + String(rgbCount));
+      Serial.println("Color: " + String(r) + ", " + String(g) + ", " + String(b));
+
+      for (int i = 0; i < NUMPIXELS; i++) //loop for lighting up all the LEDs
+      {
+        pixels.setPixelColor(i, pixels.Color(r, g, b));
         pixels.show();   // Send the updated pixel colors to the hardware.
       }
     }
