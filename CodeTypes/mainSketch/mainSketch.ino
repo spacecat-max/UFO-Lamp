@@ -14,6 +14,7 @@ I want this lamp to:
 */
 #include <Adafruit_NeoPixel.h>
 #include <Arduino_APDS9960.h>
+#include <ArduinoBLE.h>
 
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        14 // On Trinket or Gemma, suggest changing this to 1
@@ -39,9 +40,12 @@ long rgbcolors[] =
 
 void setup() 
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  //setting up communication
   //while (!Serial);
 
+  //pixels 
   if (!APDS.begin()) 
   {
     Serial.println("Error initializing APDS-9960 sensor!");
@@ -51,17 +55,17 @@ void setup()
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixels.show();  // Initialize all pixels to 'off'
   pixels.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
-  Serial.println("Detecting gestures ...");
-
 }
 
 void loop() 
 {
+  Serial.println(digitalRead(4)); //figureo ut what button does
   if (APDS.gestureAvailable()) 
   {
     int gesture = APDS.readGesture();
     pixels.clear(); // Set all pixel colors to 'off'
 
+    //gesture control
     if((GESTURE_LEFT || GESTURE_RIGHT) && millis() - pastTime > 200)
     {
       if(rgbCount >= colorsLength - 1)
